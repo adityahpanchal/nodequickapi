@@ -1,0 +1,41 @@
+{
+  "name": "quickapi",
+  "version": "1.0.0",
+  "description": "Quick API With MongoDB and MySQL",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adityahpanchal/nodequickapi.git"
+  },
+  "keywords": [
+    "Node",
+    "MongoDB",
+    "Mongoose",
+    "MySQL",
+    "Multer",
+    "Express",
+    "NodeMailer",
+    "and",
+    "Fast2SMS"
+  ],
+  "author": "Aditya Panchal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adityahpanchal/nodequickapi/issues"
+  },
+  "homepage": "https://github.com/adityahpanchal/nodequickapi#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^6.0.7",
+    "multer": "^1.4.3",
+    "mysql": "^2.18.1",
+    "nodemailer": "^6.6.3",
+    "nodemon": "^2.0.12"
+  }
+}
