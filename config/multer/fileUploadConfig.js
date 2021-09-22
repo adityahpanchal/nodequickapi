@@ -1,13 +1,15 @@
 const fileUploadConfig = {
     addProfile: {
-        fieldsData: [{ name: 'profile', maxCount: 10, required: false, minCount: 2}, { name: 'avatar', maxCount: 10, required: true, minCount: 2}],
+        fieldsData: [{ name: 'profile', maxCount: 10, required: true, minCount: 2}, { name: 'avatar', maxCount: 10, required: true, minCount: 2}, { name: 'avatar2', maxCount: 10, required: false, minCount: 2}],
         fileExtValidator: {
             profile: ['image/jpeg', 'image/jpg'],
-            avatar: ['image/png']
+            avatar: ['image/png'],
+            avatar2: ['image/jpg', 'image/jpeg']
         },
         savingDestination: {
             profile: 'profile',
-            avatar: 'avatar'
+            avatar: 'avatar',
+            avatar2: 'avatar2'
         }
     },
     addLogo: {

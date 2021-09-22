@@ -12,6 +12,14 @@ const removeFileIfFailed = (paths) => {
     })
 }
 
+let pathToDelete = []
+
+// for (const key in req.files) {
+//     let pathsOfKey = req.files[key].map(obj => obj.path) 
+//     pathToDelete = [...pathToDelete, ...pathsOfKey]
+// }
+// removeFileIfFailed(pathToDelete)
+
 exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, req, res, next) => {
     let removeTrash = []
         
@@ -55,42 +63,62 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
         } else if (err) {
             return res.json({ error: err})
         }
+  
+        let failedRequiredFields = []
+        let successRequiredFields = []
 
-        //getting required fields
-        let requiredFields = fieldsData.filter(field => field.required)
-       
-        //if required fields
-        if(requiredFields.length > 0) {
+        let faiedNotRequiredFields = []
+        let successNotRequiredFields = []
 
-            //array of failed fields
-            let failedFields = []
+        for (let i = 0; i < fieldsData.length; i++) {
 
-            for (let i = 0; i < requiredFields.length; i++) {
-                const fieldName = requiredFields[i].name
-                const minCount = requiredFields[i].minCount
-                
-                let uploadedCount = req.files[fieldName].length
-
+            if(fieldsData[i].required){
+                const minCount = fieldsData[i].minCount ? fieldsData[i].minCount : 1
+                const fieldName = fieldsData[i].name
+            
+                let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
+    
                 if(minCount > uploadedCount) {
-                    failedFields.push({fieldName: fieldName, count: uploadedCount})
+                    failedRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
+                }else{
+                    successRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
                 }
-            }
-
-            if(failedFields.length > 0) {
-                let pathToDelete = []
-
-                for (const key in req.files) {
-                    let pathsOfKey = req.files[key].map(obj => obj.path) 
-                    pathToDelete = [...pathToDelete, ...pathsOfKey]
+            }else{
+                const minCount = fieldsData[i].minCount ? fieldsData[i].minCount : 1
+                const fieldName = fieldsData[i].name
+            
+                let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
+    
+                if(minCount > uploadedCount) {
+                    faiedNotRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
+                }else{
+                    successNotRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
                 }
-                removeFileIfFailed(pathToDelete)
-
-                return res.status(200).json({
-                   message: 'some file was removed' 
-                })
-            }
+            }         
         }
-        next()
+
+        let pathsByField = {}
+
+        for (const key in req.files) {
+            let paths = []
+
+            for (let i = 0; i < req.files[key].length; i++) {
+                const element = req.files[key][i]
+                paths.push(element.path)
+            }
+
+            pathsByField[key] = paths
+        }
+
+        console.log(pathsByField)
+
+        // console.log('failed required fields', failedRequiredFields)
+        // console.log('success required fields', successRequiredFields)
+
+        
+        // console.log('failed not required fields', faiedNotRequiredFields)
+        // console.log('success not required fields', successNotRequiredFields)
+       next()
     })
 }
 
