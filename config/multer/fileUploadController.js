@@ -70,6 +70,10 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
         let faiedNotRequiredFields = []
         let successNotRequiredFields = []
 
+        let pathsByField = {}
+
+        let allPaths = []
+
         for (let i = 0; i < fieldsData.length; i++) {
 
             if(fieldsData[i].required){
@@ -94,12 +98,8 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
                 }else{
                     successNotRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
                 }
-            }         
-        }
-
-        let pathsByField = {}
-
-        for (let i = 0; i < fieldsData.length; i++) {
+            } 
+            
             const element = fieldsData[i].name;
             if(req.files[element]){
 
@@ -108,6 +108,7 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
                 for (let i = 0; i < req.files[element].length; i++) {
                     const obj = req.files[element][i]
                     paths.push(obj.path)
+                    allPaths.push(obj.path)
                 }
                 pathsByField[element] = paths
             }else{
@@ -115,18 +116,8 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
             }
         }
 
-        // for (const key in req.files) {
-        //     let paths = []
-
-        //     for (let i = 0; i < req.files[key].length; i++) {
-        //         const element = req.files[key][i]
-        //         paths.push(element.path)
-        //     }
-
-        //     pathsByField[key] = paths
-        // }
-
         console.log(pathsByField)
+        console.log(allPaths)
 
         // console.log('failed required fields', failedRequiredFields)
         // console.log('success required fields', successRequiredFields)
