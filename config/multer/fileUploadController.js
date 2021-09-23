@@ -99,16 +99,32 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
 
         let pathsByField = {}
 
-        for (const key in req.files) {
-            let paths = []
+        for (let i = 0; i < fieldsData.length; i++) {
+            const element = fieldsData[i].name;
+            if(req.files[element]){
 
-            for (let i = 0; i < req.files[key].length; i++) {
-                const element = req.files[key][i]
-                paths.push(element.path)
+                let paths = []
+
+                for (let i = 0; i < req.files[element].length; i++) {
+                    const obj = req.files[element][i]
+                    paths.push(obj.path)
+                }
+                pathsByField[element] = paths
+            }else{
+                pathsByField[element] = []
             }
-
-            pathsByField[key] = paths
         }
+
+        // for (const key in req.files) {
+        //     let paths = []
+
+        //     for (let i = 0; i < req.files[key].length; i++) {
+        //         const element = req.files[key][i]
+        //         paths.push(element.path)
+        //     }
+
+        //     pathsByField[key] = paths
+        // }
 
         console.log(pathsByField)
 
