@@ -64,11 +64,7 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
             return res.json({ error: err})
         }
   
-        let failedRequiredFields = []
-        let successRequiredFields = []
-
-        let faiedNotRequiredFields = []
-        let successNotRequiredFields = []
+        let uploadReport = []
 
         let pathsByField = {}
 
@@ -83,9 +79,9 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
                 let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
     
                 if(minCount > uploadedCount) {
-                    failedRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
+                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: true, success: false})
                 }else{
-                    successRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
+                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: true, success: true})
                 }
             }else{
                 const minCount = fieldsData[i].minCount ? fieldsData[i].minCount : 1
@@ -94,9 +90,9 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
                 let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
     
                 if(minCount > uploadedCount) {
-                    faiedNotRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
+                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: false, success: false})
                 }else{
-                    successNotRequiredFields.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount})
+                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: false, success: true})
                 }
             } 
             
@@ -116,15 +112,10 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
             }
         }
 
-        console.log(pathsByField)
-        console.log(allPaths)
-
-        // console.log('failed required fields', failedRequiredFields)
-        // console.log('success required fields', successRequiredFields)
-
-        
-        // console.log('failed not required fields', faiedNotRequiredFields)
-        // console.log('success not required fields', successNotRequiredFields)
+        req.uploadReport = uploadReport
+        req.pathsByField = pathsByField
+        req.allPaths = allPaths
+    
        next()
     })
 }
