@@ -1,7 +1,7 @@
 const router = require('express').Router()
-const { fileUploader, fileUploadConfig } = require('../../config/multer/index')
+const { fileUploader, fileUploadConfig, profileModel } = require('../../config/multer/index')
 
-router.post('/addProfile', fileUploader(fileUploadConfig.addProfile), (req, res) => {
+router.post('/addProfile', fileUploader(profileModel), (req, res) => {
     return res.json({
         data: req.files
     })

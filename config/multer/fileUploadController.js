@@ -20,13 +20,13 @@ let pathToDelete = []
 // }
 // removeFileIfFailed(pathToDelete)
 
-exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, req, res, next) => {
-    let removeTrash = []
-        
+exports.multiFieldsUploader = (params, req, res, next) => {
+    let removeTrash = {}
+    
     const diskStorage = multer.diskStorage({
 
         destination: (req, file, cb) =>{
-            cb(null, path.join(__dirname, `../../public/uploads/${savingDestination[file.fieldname]}`))
+            cb(null, path.join(__dirname, `../../public/uploads/${params[file.fieldname].savingDestination}`))
         },
     
         filename: (req, file, cb) => {
@@ -41,20 +41,31 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
 
     const fileFilter = (req, file, cb) => {
 
-        let validatorExtension = fileExtValidator[file.fieldname]
+        let validatorExtension = params[file.fieldname].fileExtValidator
 
         if(validatorExtension.indexOf(file.mimetype) !== -1) {
             cb(null, true)
         }else{
             cb(null, false)
 
-            if(removeTrash.indexOf(file.fieldname) === -1) {
-                removeTrash.push(file.fieldname)
+            if(!removeTrash[file.fieldname]) {
+                removeTrash[file.fieldname] = {
+                    required: params[file.fieldname].required,
+                    maxCount: params[file.fieldname].maxCount
+                }
             }
         }
     
     }
 
+    let fieldsData = []
+    for (const field in params) {
+
+        let maxCount = params[field].maxCount
+
+        fieldsData.push({name: field, maxCount: maxCount})
+    }
+    console.log(fieldsData)
     const upload = multer({fileFilter: fileFilter, storage: diskStorage}).fields(fieldsData)
 
     upload(req, res, function (err) {
@@ -70,47 +81,94 @@ exports.multiFieldsUploader = (fieldsData, fileExtValidator, savingDestination, 
 
         let allPaths = []
 
-        for (let i = 0; i < fieldsData.length; i++) {
+        for (const field in params) {
+            const minCount = params[field].minCount ? params[field].minCount : 1
+            const fieldName = field
 
-            if(fieldsData[i].required){
-                const minCount = fieldsData[i].minCount ? fieldsData[i].minCount : 1
-                const fieldName = fieldsData[i].name
-            
-                let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
-    
-                if(minCount > uploadedCount) {
-                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: true, success: false})
-                }else{
-                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: true, success: true})
-                }
+            let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
+            let isRequired = params[fieldName].required
+
+            if(minCount > uploadedCount) {
+                uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: isRequired, success: false})
             }else{
-                const minCount = fieldsData[i].minCount ? fieldsData[i].minCount : 1
-                const fieldName = fieldsData[i].name
-            
-                let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
-    
-                if(minCount > uploadedCount) {
-                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: false, success: false})
-                }else{
-                    uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: false, success: true})
-                }
-            } 
-            
-            const element = fieldsData[i].name;
-            if(req.files[element]){
+                uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: isRequired, success: true})
+            }
 
+            if(req.files[fieldName]){
                 let paths = []
 
-                for (let i = 0; i < req.files[element].length; i++) {
-                    const obj = req.files[element][i]
+                for (let i = 0; i < req.files[fieldName].length; i++) {
+                    const obj = req.files[fieldName][i]
                     paths.push(obj.path)
                     allPaths.push(obj.path)
                 }
-                pathsByField[element] = paths
+
+                pathsByField[fieldName] = paths
             }else{
-                pathsByField[element] = []
+                pathsByField[fieldName] = []
             }
         }
+
+         //     const element = fieldsData[i].name;
+        //     if(req.files[element]){
+
+        //         let paths = []
+
+        //         for (let i = 0; i < req.files[element].length; i++) {
+        //             const obj = req.files[element][i]
+        //             paths.push(obj.path)
+        //             allPaths.push(obj.path)
+        //         }
+        //         pathsByField[element] = paths
+        //     }else{
+        //         pathsByField[element] = []
+        //     }
+
+        // for (let i = 0; i < fieldsData.length; i++) {
+
+        //     if(fieldsData[i].required){
+        //         const minCount = fieldsData[i].minCount ? fieldsData[i].minCount : 1
+        //         const fieldName = fieldsData[i].name
+            
+        //         let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
+    
+        //         if(minCount > uploadedCount) {
+        //             uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: true, success: false})
+        //         }else{
+        //             uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: true, success: true})
+        //         }
+        //     }else{
+        //         const minCount = fieldsData[i].minCount ? fieldsData[i].minCount : 1
+        //         const fieldName = fieldsData[i].name
+            
+        //         let uploadedCount = req.files[fieldName] ? req.files[fieldName].length : 0
+    
+        //         if(minCount > uploadedCount) {
+        //             uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: false, success: false})
+        //         }else{
+        //             uploadReport.push({fieldName: fieldName, uploadedCount: uploadedCount, minCount: minCount, required: false, success: true})
+        //         }
+        //     } 
+            
+        //     const element = fieldsData[i].name;
+        //     if(req.files[element]){
+
+        //         let paths = []
+
+        //         for (let i = 0; i < req.files[element].length; i++) {
+        //             const obj = req.files[element][i]
+        //             paths.push(obj.path)
+        //             allPaths.push(obj.path)
+        //         }
+        //         pathsByField[element] = paths
+        //     }else{
+        //         pathsByField[element] = []
+        //     }
+        // }
+
+        console.log(uploadReport)
+        console.log(pathsByField)
+        console.log(allPaths)
 
         req.uploadReport = uploadReport
         req.pathsByField = pathsByField
